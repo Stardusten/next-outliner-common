@@ -17,13 +17,6 @@ export type ModuleDef = ReturnType<typeof defineModule>;
 
 export const buildModules = async <DEFS extends Record<string, _ModuleBasicDef<any>>>(moduleDefs: DEFS) => {
   const env = {} as any;
-
-  const proxiedEnv = new Proxy(env, {
-    get(target, prop) {
-      if (prop in target) return target[prop];
-      throw new Error(`Module ${prop.toString()} not found`);
-    },
-  });
   
   const buildModule = async (env: any, moduleDef: ModuleDef, alias: string) => {
     if (moduleDef.id in env) {
@@ -34,7 +27,7 @@ export const buildModules = async <DEFS extends Record<string, _ModuleBasicDef<a
     for (const [alias, dep] of Object.entries(moduleDef.deps)){
       await buildModule(env, dep as any, alias); // recursively build dependencies
     }
-    env[moduleDef.id] = await moduleDef.build(proxiedEnv);
+    env[moduleDef.id] = await moduleDef.build(env);
     env[alias] = env[moduleDef.id];
     return env;
   }
@@ -42,5 +35,5 @@ export const buildModules = async <DEFS extends Record<string, _ModuleBasicDef<a
   for (const [alias, moduleDef] of Object.entries(moduleDefs))
     await buildModule(env, moduleDef as any, alias);
 
-  return proxiedEnv as { [ELEM in keyof DEFS]: ModuleInstance<DEFS[ELEM]> };
+  return env as { [ELEM in keyof DEFS]: ModuleInstance<DEFS[ELEM]> };
 };
