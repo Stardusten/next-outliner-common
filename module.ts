@@ -17,18 +17,30 @@ export type ModuleDef = ReturnType<typeof defineModule>;
 
 export const wireModules = <DEFS extends Record<string, _ModuleBasicDef<any>>>(moduleDefs: DEFS) => {
   const env = {} as any;
+
+  const proxiedEnv = new Proxy(env, {
+    get(target, prop) {
+      if (prop in target) return target[prop];
+      throw new Error(`Module ${prop.toString()} not found`);
+    },
+  });
   
-  const buildModule = (env: any, moduleDef: ModuleDef) => {
-    if (moduleDef.id in env) return env; // don't build the same module twice
+  const buildModule = (env: any, moduleDef: ModuleDef, alias: string) => {
+    if (moduleDef.id in env) {
+      env[alias] = env[moduleDef.id];
+      return env; // don't build the same module twice
+    }
     console.info(`Building module ${moduleDef.id}...`);
-    for (const dep of Object.values(moduleDef.deps))
-      buildModule(env, dep as any); // recursively build dependencies
-    env[moduleDef.id] = moduleDef.build(env);
+    for (const [alias, dep] of Object.entries(moduleDef.deps)){
+      buildModule(env, dep as any, alias); // recursively build dependencies
+    }
+    env[moduleDef.id] = moduleDef.build(proxiedEnv);
+    env[alias] = env[moduleDef.id];
     return env;
   }
 
-  for (const moduleDef of Object.values(moduleDefs))
-    buildModule(env, moduleDef as any);
+  for (const [alias, moduleDef] of Object.entries(moduleDefs))
+    buildModule(env, moduleDef as any, alias);
 
-  return env as { [ELEM in keyof DEFS]: ModuleInstance<DEFS[ELEM]> };
+  return proxiedEnv as { [ELEM in keyof DEFS]: ModuleInstance<DEFS[ELEM]> };
 };
