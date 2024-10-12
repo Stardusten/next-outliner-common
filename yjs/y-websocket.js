@@ -52,7 +52,7 @@ messageHandlers[messageSync] = (
   )
   if (
     emitSynced &&
-    docGuid === provider.roomname &&
+    docGuid === provider.doc.guid &&
     syncMessageType === syncProtocol.messageYjsSyncStep2 &&
     !provider.synced
   ) {
@@ -60,7 +60,7 @@ messageHandlers[messageSync] = (
   }
 
   // sub doc synced
-  if (emitSynced && docGuid !== provider.roomname && syncMessageType === syncProtocol.messageYjsSyncStep2 && !provider._syncedStatus.get(docGuid)) {
+  if (emitSynced && docGuid !== provider.doc.guid && syncMessageType === syncProtocol.messageYjsSyncStep2 && !provider._syncedStatus.get(docGuid)) {
     provider.updateSyncedStatus(docGuid, true)
   }
 }
@@ -337,7 +337,7 @@ export class WebsocketProvider extends Observable {
      * @type {Map}
      */
     this.docs = new Map()
-    this.docs.set(this.roomname, doc)
+    this.docs.set(this.doc.guid, doc)
     this.subdocUpdateHandlers = new Map()
 
     /**
@@ -382,7 +382,7 @@ export class WebsocketProvider extends Observable {
       if (origin !== this) {
         const encoder = encoding.createEncoder()
         encoding.writeVarUint(encoder, messageSync)
-        encoding.writeVarString(encoder, this.roomname)
+        encoding.writeVarString(encoder, this.doc.guid)
         syncProtocol.writeUpdate(encoder, update)
         broadcastMessage(this, encoding.toUint8Array(encoder))
       }
