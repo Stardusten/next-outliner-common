@@ -17,6 +17,7 @@ export type ModuleDef = ReturnType<typeof defineModule>;
 
 export const buildModules = async <DEFS extends Record<string, _ModuleBasicDef<any>>>(moduleDefs: DEFS) => {
   const env = {} as any;
+  
   const buildModule = async (env: any, moduleDef: ModuleDef, alias: string) => {
     if (moduleDef.id in env) {
       env[alias] = env[moduleDef.id];
