@@ -33,6 +33,11 @@ const subdocsMap = new Map()
  */
 const persistenceMap = new Map()
 
+// 我们假设同一个 persistence 下，所有 doc 的 docname 是唯一的
+// 但是不同 persistence 下的 docname 可以相同
+// 因此我们全局使用 `{ldbLocation}{docname}` 作为 guid 来唯一标识一个 doc
+// 但 persistence 中的 key 是 docname，和 location 无关
+// 这样的好处时，persistence 移动时，不需要修改 docname
 const getPersistence = (ldbLocation) => {
   let persistence = persistenceMap.get(ldbLocation)
 
@@ -99,12 +104,11 @@ export const setContentInitializor = (f) => {
 
 export class WSSharedDoc extends Y.Doc {
   /**
-   * @param {string} name
+   * @param {string} guid
    * @param {string} location
    */
-  constructor (name, location) {
-    super({ gc: gcEnabled })
-    this.name = name
+  constructor (guid, location) {
+    super({ gc: gcEnabled, guid })
     this.location = location
     /**
      * Maps from conn to set of controlled user ids. Delete all user ids from awareness when this conn is closed
@@ -154,18 +158,19 @@ export class WSSharedDoc extends Y.Doc {
 /**
  * Gets a Y.Doc by name, whether in memory or on disk
  *
- * @param {string} docname - the name of the Y.Doc to find or create
+ * @param {string} docname
+ * @param {string} ldbLocation use `{ldbLocation}{docname}` as guid to uniquely identify the doc
  * @param {boolean} gc - whether to allow gc on the doc (applies only when created)
  * @return {WSSharedDoc}
  */
-export const getYDoc = (docname, ldbLocation, gc = true) => map.setIfUndefined(docs, docname, () => {
-  const doc = new WSSharedDoc(docname, ldbLocation)
+export const getYDoc = (docname, ldbLocation, gc = true) => map.setIfUndefined(docs, ldbLocation + docname, () => {
+  const doc = new WSSharedDoc(ldbLocation + docname, ldbLocation)
   doc.gc = gc
   const persistence = getPersistence(ldbLocation)
   if (persistence !== null) {
     persistence.bindState(docname, doc)
   }
-  docs.set(docname, doc)
+  docs.set(doc.guid, doc)
   return doc
 })
 
@@ -195,21 +200,21 @@ const messageListener = (conn, doc, ldbLocation, message) => {
       case messageSync:
         let targetDoc = doc
         const docGuid = decoding.readVarString(decoder)
-        if (docGuid !== doc.name) {
+        if (docGuid !== doc.guid) {
           // subdoc
           targetDoc = getYDoc(docGuid, ldbLocation, false)
           if (!targetDoc.conns.has(conn)) targetDoc.conns.set(conn, new Set())
 
-          /**@type {Map<String, Boolean>}*/ const subm = subdocsMap.get(doc.name)
-          if (subm && subm.has(targetDoc.name)) {
+          /**@type {Map<String, Boolean>}*/ const subm = subdocsMap.get(doc.guid)
+          if (subm && subm.has(targetDoc.guid)) {
             // sync step 1 done before.
           } else {
             if (subm) {
-              subm.set(targetDoc.name, targetDoc)
+              subm.set(targetDoc.guid, targetDoc)
             } else {
               const nm = new Map()
-              nm.set(targetDoc.name, targetDoc)
-              subdocsMap.set(doc.name, nm)
+              nm.set(targetDoc.guid, targetDoc)
+              subdocsMap.set(doc.guid, nm)
             }
 
             // send sync step 1
@@ -250,18 +255,18 @@ const messageListener = (conn, doc, ldbLocation, message) => {
 const closeConn = (doc, conn) => {
   if (doc.conns.has(conn)) {
     // clear sub docs
-    const m = subdocsMap.get(doc.name)
+    const m = subdocsMap.get(doc.guid)
     if (m && m.size > 0) {
       for (const subdoc of m.values()) {
         subdoc.conns.delete(conn)
         if (subdoc.conns.size === 0) {
           const persistence = getPersistence(doc.location)
           if (persistence !== null) {
-            persistence.writeState(subdoc.name, doc).then(() => {
+            persistence.writeState(subdoc.guid, doc).then(() => {
               subdoc.destroy()
             })
           } else subdoc.destroy()
-          docs.delete(subdoc.name)
+          docs.delete(subdoc.guid)
         }
       }
     }
@@ -277,12 +282,12 @@ const closeConn = (doc, conn) => {
       const persistence = getPersistence(doc.location)
       if (persistence !== null) {
         // if persisted, we store state and destroy ydocument
-        persistence.writeState(doc.name, doc).then(() => {
+        persistence.writeState(doc.guid, doc).then(() => {
           doc.destroy()
         })
       } else doc.destroy()
-      docs.delete(doc.name)
-      subdocsMap.delete(doc.name)
+      docs.delete(doc.guid)
+      subdocsMap.delete(doc.guid)
     }
   }
   conn.close()
@@ -311,10 +316,10 @@ const pingTimeout = 30000
  * @param {import('http').IncomingMessage} req
  * @param {any} opts
  */
-export const setupWSConnection = (conn, req, { location, gc = true } = {}) => {
+export const setupWSConnection = (conn, req, { docname, location, gc = true } = {}) => {
   conn.binaryType = 'arraybuffer'
   // get doc, initialize if it does not exist yet
-  const doc = getYDoc(docName, location, gc)
+  const doc = getYDoc(docname, location, gc)
   doc.conns.set(conn, new Set())
   // listen and reply to events
   conn.on('message', /** @param {ArrayBuffer} message */ message => messageListener(conn, doc, location, new Uint8Array(message)))
