@@ -1,5 +1,6 @@
 import type { Ref } from "vue";
 import { z } from "zod";
+import { BLOCK_CONTENT_TYPES } from "./constants";
 
 // first 2 bits:
 //   00 - normal block
@@ -12,12 +13,12 @@ export const BlockStatusSchema = z.number().min(0).max(5 /* 101 */);
 export const BlockIdSchema = z.string();
 
 export const TextContentSchema = z.tuple([
-  z.literal(0), // type
+  z.literal(BLOCK_CONTENT_TYPES.TEXT), // type
   z.any(), // prosemirror doc
 ]);
 
 export const ImageContentSchema = z.tuple([
-  z.literal(1), // type
+  z.literal(BLOCK_CONTENT_TYPES.IMAGE), // type
   z.string(), // path
   z.enum(["left", "center"]), // align
   z.string().nullable(), // caption
@@ -25,18 +26,18 @@ export const ImageContentSchema = z.tuple([
 ]);
 
 export const CodeContentSchema = z.tuple([
-  z.literal(2), // type
+  z.literal(BLOCK_CONTENT_TYPES.CODE), // type
   z.string(), // code
   z.string(), // lang
 ]);
 
 export const MathDisplayContentSchema = z.tuple([
-  z.literal(3), // type
+  z.literal(BLOCK_CONTENT_TYPES.MATH), // type
   z.string(), // src
 ]);
 
 export const QueryContentSchema = z.tuple([
-  z.literal(4), // type
+  z.literal(BLOCK_CONTENT_TYPES.QUERY), // type
   z.any(), // prosemirror doc of title
   z.string(), // query
   z.boolean(), // showResults
@@ -67,24 +68,28 @@ export type LoadingBlock = {
   childrenIds: BlockId[];
   fold: boolean;
   deleted: boolean;
-  docId: number;
 } & (
-  | { type: "normalBlock" }
+  | { type: "normalBlock"; docId: string }
   | {
-      type: "mirrorBlock" | "virtualBlock";
+      type: "mirrorBlock";
       src: BlockId;
+    }
+  | {
+      type: "virtualBlock";
+      src: BlockId;
+      childrenCreated: boolean;
     }
 );
 
 export type LoadedBlock = {
   loading: false;
   id: BlockId;
-  deleted: boolean;
   parentId: BlockId;
-  parentRef: Ref<ABlock | null>;
+  parentRef: Ref<LoadedBlock | null>;
   childrenIds: BlockId[];
-  childrenRefs: Ref<ABlock | null>[];
+  childrenRefs: Ref<LoadedBlock | null>[];
   fold: boolean;
+  deleted: boolean;
   content: BlockContent;
   ctext: string;
   metadata: Record<string, any>; // TODO
@@ -92,14 +97,20 @@ export type LoadedBlock = {
   olinks: BlockId[];
   boosting: number;
   acturalSrc: BlockId;
-  docId: number;
 } & (
-  | { type: "normalBlock" }
+  | { type: "normalBlock"; docId: string }
   | {
-      type: "mirrorBlock" | "virtualBlock";
+      type: "mirrorBlock";
       src: BlockId;
     }
+  | {
+      type: "virtualBlock";
+      src: BlockId;
+      childrenCreated: boolean;
+    }
 );
+
+export type LoadedBlockWithLevel = LoadedBlock & { level: number };
 
 export type LoadingNormalBlock = LoadingBlock & { type: "normalBlock" };
 export type LoadingMirrorBlock = LoadingBlock & { type: "mirrorBlock" };
