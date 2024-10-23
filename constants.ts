@@ -8,6 +8,14 @@ export const BLOCK_CONTENT_TYPES = {
   QUERY: 4,
 } as const;
 
+export const BLOCK_TYPE_ZH_NAMES = [
+  "文本",
+  "图片",
+  "代码",
+  "公式",
+  "查询",
+];
+
 export const RESP_CODES = {
   SUCCESS: 0,
   INVALID_REQUEST: 1,

@@ -16,6 +16,7 @@ export type AsyncTask = {
   recursive?: boolean;
   // 任务的超时时间，单位为毫秒
   timeout?: number;
+  description?: string;
 };
 
 export class AsyncTaskQueue {
@@ -39,9 +40,10 @@ export class AsyncTaskQueue {
       debounce?: boolean;
       checker?: () => boolean;
       timeout?: number;
+      description?: string;
     } = {},
   ) {
-    const { type, delay, debounce, checker, timeout } = options;
+    const { type, delay, debounce, checker, timeout, description } = options;
     const id = this.id++;
     // console.log("add task", id);
     // if debounce == true, find a task with the same type in queue to merge
@@ -75,9 +77,10 @@ export class AsyncTaskQueue {
           recursive: true,
           checker,
           timeout,
+          description,
         });
       } else {
-        this.queue.push({ id, callback, type: type ?? "null", canceller, timeout, checker });
+        this.queue.push({ id, callback, type: type ?? "null", canceller, timeout, checker, description });
       }
     } else {
       if (recursive) {
@@ -88,9 +91,10 @@ export class AsyncTaskQueue {
           recursive: true,
           checker,
           timeout,
+          description,
         });
       } else {
-        this.queue.push({ id, callback, type: type ?? "null", checker, timeout });
+        this.queue.push({ id, callback, type: type ?? "null", checker, timeout, description });
       }
       this._processQueue(id);
     }
@@ -104,6 +108,7 @@ export class AsyncTaskQueue {
       debounce?: boolean;
       checker?: () => boolean;
       timeout?: number;
+      description?: string;
     } = {},
   ) {
     return new Promise((resolve) => {
@@ -135,7 +140,7 @@ export class AsyncTaskQueue {
     }
 
     const task = this.queue.shift()!;
-    const { id, callback, canceller, recursive, checker, timeout } = task;
+    const { id, callback, canceller, recursive, checker, timeout, description } = task;
 
     this.ongoingTask = task;
     // console.log("start processing task", id);
@@ -157,6 +162,7 @@ export class AsyncTaskQueue {
         console.error(error);
       }
     }
+    console.log(`[AsyncTaskQueue] Task (${id}) ${description ?? ""} finished`);
     // console.log(task.id, "finished");
 
     this.ongoingTask = null;

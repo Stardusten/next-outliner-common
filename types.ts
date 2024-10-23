@@ -1,4 +1,3 @@
-import type { Ref } from "vue";
 import { z } from "zod";
 import { BLOCK_CONTENT_TYPES } from "./constants";
 
@@ -52,6 +51,45 @@ export const BlockContentSchema = z.union([
   QueryContentSchema,
 ]);
 
+export const BlockInfoSchema = z.tuple([
+  // status 用一个整数记录这个块的类型和折叠状态
+  BlockStatusSchema,
+  // parent id
+  BlockIdSchema,
+  // children ids
+  z.array(BlockIdSchema),
+  // 这个 block 的数据所在的数据 doc 的名字
+  // 如果是镜像块或虚拟块，这个值为 null
+  z.number().nullable(),
+  // 如果是普通块，这个值为 null
+  // 如果是镜像块或虚拟块，指向源块的 id
+  BlockIdSchema.nullable()
+]);
+
+export const BlockDataSchema = z.tuple([
+  // content (only for normal blocks)
+  BlockContentSchema.nullable(),
+  // metadata
+  z.record(z.any()),
+]);
+
+export const BlockDataDocSchema = z.object({
+  id: z.number(),
+  blockDatas: z.array(BlockDataSchema),
+});
+
+export const SavePointSchema_v2 = z.object({
+  schema: z.literal("v2"),
+  blockInfos: z.array(BlockInfoSchema),
+  blockDataDocs: z.array(BlockDataDocSchema),
+  label: z.string(),
+  createdAt: z.string(),
+});
+
+export const SavePointSchema = z.discriminatedUnion("schema", [
+  SavePointSchema_v2,
+]);
+
 export type BlockStatus = z.infer<typeof BlockStatusSchema>;
 export type BlockId = string;
 export type BlockContent = z.infer<typeof BlockContentSchema>;
@@ -60,64 +98,6 @@ export type ImageContent = z.infer<typeof ImageContentSchema>;
 export type CodeContent = z.infer<typeof CodeContentSchema>;
 export type MathDisplayContent = z.infer<typeof MathDisplayContentSchema>;
 export type QueryContent = z.infer<typeof QueryContentSchema>;
-
-export type LoadingBlock = {
-  loading: true;
-  id: BlockId;
-  parentId: BlockId;
-  childrenIds: BlockId[];
-  fold: boolean;
-  deleted: boolean;
-} & (
-  | { type: "normalBlock"; docId: string }
-  | {
-      type: "mirrorBlock";
-      src: BlockId;
-    }
-  | {
-      type: "virtualBlock";
-      src: BlockId;
-      childrenCreated: boolean;
-    }
-);
-
-export type LoadedBlock = {
-  loading: false;
-  id: BlockId;
-  parentId: BlockId;
-  parentRef: Ref<LoadedBlock | null>;
-  childrenIds: BlockId[];
-  childrenRefs: Ref<LoadedBlock | null>[];
-  fold: boolean;
-  deleted: boolean;
-  content: BlockContent;
-  ctext: string;
-  metadata: Record<string, any>; // TODO
-  mtext: string;
-  olinks: BlockId[];
-  boosting: number;
-  acturalSrc: BlockId;
-} & (
-  | { type: "normalBlock"; docId: string }
-  | {
-      type: "mirrorBlock";
-      src: BlockId;
-    }
-  | {
-      type: "virtualBlock";
-      src: BlockId;
-      childrenCreated: boolean;
-    }
-);
-
-export type LoadedBlockWithLevel = LoadedBlock & { level: number };
-
-export type LoadingNormalBlock = LoadingBlock & { type: "normalBlock" };
-export type LoadingMirrorBlock = LoadingBlock & { type: "mirrorBlock" };
-export type LoadingVirtualBlock = LoadingBlock & { type: "virtualBlock" };
-
-export type LoadedNormalBlock = LoadedBlock & { type: "normalBlock" };
-export type LoadedMirrorBlock = LoadedBlock & { type: "mirrorBlock" };
-export type LoadedVirtualBlock = LoadedBlock & { type: "virtualBlock" };
-
-export type ABlock = LoadingBlock | LoadedBlock;
+export type BlockInfo = z.infer<typeof BlockInfoSchema>;
+export type BlockData = z.infer<typeof BlockDataSchema>;
+export type SavePoint = z.infer<typeof SavePointSchema>;
