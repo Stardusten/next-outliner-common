@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createPostApi } from "./utils";
 
 export const FetchWebpageTitleSchema = {
   request: z.object({
@@ -8,3 +9,9 @@ export const FetchWebpageTitleSchema = {
     title: z.string(),
   }),
 };
+
+export const fetchWebpageTitle = createPostApi(
+  "/fetch-webpage-title",
+  FetchWebpageTitleSchema.request,
+  FetchWebpageTitleSchema.result,
+);

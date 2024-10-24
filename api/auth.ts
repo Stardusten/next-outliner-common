@@ -1,6 +1,7 @@
 import { z } from "zod";
+import { createPostApi } from "./utils";
 
-export const AuthSchema = {
+export const LoginSchema = {
   request: z.object({
     password: z.string(),
   }),
@@ -8,3 +9,9 @@ export const AuthSchema = {
     token: z.string(),
   }),
 };
+
+export const login = createPostApi(
+  "/login",
+  LoginSchema.request,
+  LoginSchema.result,
+);

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createPostApi } from "./utils";
 
 export const GetAllSavePointsSchema = {
   request: z.object({
@@ -13,6 +14,12 @@ export const GetAllSavePointsSchema = {
   }),
 }
 
+export const getAllSavePoints = createPostApi(
+  "/get-all-save-points",
+  GetAllSavePointsSchema.request,
+  GetAllSavePointsSchema.result,
+);
+
 export const CreateSavePointSchema = {
   request: z.object({
     label: z.string(),
@@ -20,6 +27,12 @@ export const CreateSavePointSchema = {
   }),
   result: z.object({}),
 }
+
+export const createSavePoint = createPostApi(
+  "/create-save-point",
+  CreateSavePointSchema.request,
+  CreateSavePointSchema.result,
+);
 
 export const DeleteSavePointSchema = {
   request: z.object({
@@ -29,6 +42,12 @@ export const DeleteSavePointSchema = {
   result: z.object({}),
 }
 
+export const deleteSavePoint = createPostApi(
+  "/delete-save-point",
+  DeleteSavePointSchema.request,
+  DeleteSavePointSchema.result,
+);
+
 export const RenameSavePointSchema = {
   request: z.object({
     location: z.string(),
@@ -36,4 +55,10 @@ export const RenameSavePointSchema = {
     newLabel: z.string(),
   }),
   result: z.object({}),
-}
+  }
+
+export const renameSavePoint = createPostApi(
+  "/rename-save-point",
+  RenameSavePointSchema.request,
+  RenameSavePointSchema.result,
+);
