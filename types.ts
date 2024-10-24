@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BLOCK_CONTENT_TYPES } from "./constants";
+import { BLOCK_CONTENT_TYPES, RESP_CODES } from "./constants";
 
 // first 2 bits:
 //   00 - normal block
@@ -100,3 +100,16 @@ export type QueryContent = z.infer<typeof QueryContentSchema>;
 export type BlockInfo = z.infer<typeof BlockInfoSchema>;
 export type BlockData = z.infer<typeof BlockDataSchema>;
 export type SavePoint = z.infer<typeof SavePointSchema>;
+
+type NonZero<T extends number> = T extends 0 ? never : number extends T ? never : T;
+type Zero<T extends number> = T extends 0 ? number extends T ? never : T : never;
+
+export type Resp<DATA> = {
+  code: Zero<number>;
+  data: DATA;
+} | {
+  code: NonZero<number>;
+  msg: string;
+};
+
+const x = 1 as Resp<string> & { code: 0 };
