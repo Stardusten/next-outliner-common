@@ -9,7 +9,6 @@ export const createPostApi = <
   endpoint: string,
   paramsSchema: PARAMS_SCHEMA,
   resultSchema: RESULT_SCHEMA,
-  browserEffect?: (result: z.infer<RESULT_SCHEMA>) => Promise<void> | void,
 ) => {
   const isBrowser = typeof window !== "undefined";
 
@@ -43,10 +42,6 @@ export const createPostApi = <
             `[INVALID_RESPONSE] endpoint=${endpoint}, params=${JSON.stringify(params)}, response=${JSON.stringify(res.data)}, validationErrors=${JSON.stringify(result.error.errors)}`,
           );
           return { code: RESP_CODES.INVALID_RESPONSE, data: undefined };
-        }
-
-        if (isBrowser && browserEffect) {
-          await browserEffect(result.data.data);
         }
 
         return result.data;
