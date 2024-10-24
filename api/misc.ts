@@ -15,3 +15,14 @@ export const fetchWebpageTitle = createPostApi(
   FetchWebpageTitleSchema.request,
   FetchWebpageTitleSchema.result,
 );
+
+export const PingSchema = {
+  request: z.object({}),
+  result: z.object({}),
+};
+
+export const ping = createPostApi(
+  "/ping",
+  PingSchema.request,
+  PingSchema.result,
+);
