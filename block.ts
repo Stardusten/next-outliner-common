@@ -1,4 +1,4 @@
-import type { Block, BlockStatus } from "./types";
+import type { BlockStatus } from "./types";
 
 export const extractBlockStatus = (blockStatus: BlockStatus) => {
   const type = blockStatus & 0b11;
@@ -9,6 +9,6 @@ export const extractBlockStatus = (blockStatus: BlockStatus) => {
   } as const;
 };
 
-export const calcBlockStatus = (type: Block["type"], fold: boolean) => {
+export const calcBlockStatus = (type: "normalBlock" | "mirrorBlock" | "virtualBlock", fold: boolean) => {
   return (type == "normalBlock" ? 0 : type == "mirrorBlock" ? 1 : 2) | (fold ? 0b100 : 0);
 };

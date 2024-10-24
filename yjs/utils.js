@@ -385,6 +385,7 @@ const pingTimeout = 30000;
 export const setupWSConnection = (
   conn,
   req,
+  // TODO remove docname
   { docname, location, gc = true } = {},
 ) => {
   conn.binaryType = "arraybuffer";

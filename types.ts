@@ -10,6 +10,7 @@ import { BLOCK_CONTENT_TYPES } from "./constants";
 //   1 - expanded
 export const BlockStatusSchema = z.number().min(0).max(5 /* 101 */);
 export const BlockIdSchema = z.string();
+export const DataDocIdSchema = z.coerce.number();
 
 export const TextContentSchema = z.tuple([
   z.literal(BLOCK_CONTENT_TYPES.TEXT), // type
@@ -63,7 +64,7 @@ export const BlockInfoSchema = z.tuple([
   z.number().nullable(),
   // 如果是普通块，这个值为 null
   // 如果是镜像块或虚拟块，指向源块的 id
-  BlockIdSchema.nullable()
+  BlockIdSchema.nullable(),
 ]);
 
 export const BlockDataSchema = z.tuple([
@@ -73,17 +74,15 @@ export const BlockDataSchema = z.tuple([
   z.record(z.any()),
 ]);
 
-export const BlockDataDocSchema = z.object({
-  id: z.number(),
-  blockDatas: z.array(BlockDataSchema),
-});
-
 export const SavePointSchema_v2 = z.object({
   schema: z.literal("v2"),
-  blockInfos: z.array(BlockInfoSchema),
-  blockDataDocs: z.array(BlockDataDocSchema),
+  blockInfos: z.record(BlockIdSchema, BlockInfoSchema),
+  blockDataDocs: z.record(
+    DataDocIdSchema,
+    z.record(BlockIdSchema, BlockDataSchema),
+  ),
   label: z.string(),
-  createdAt: z.string(),
+  createdAt: z.coerce.date(),
 });
 
 export const SavePointSchema = z.discriminatedUnion("schema", [

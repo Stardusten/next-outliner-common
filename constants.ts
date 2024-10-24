@@ -23,4 +23,5 @@ export const RESP_CODES = {
   EXCEED_MAX_ATTEMPTS: 3,
   NO_AUTHORIZATION: 4,
   UNKNOWN_ERROR: 5,
+  TARGET_NOT_FOUND: 6,
 } as const;
