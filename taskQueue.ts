@@ -28,7 +28,7 @@ export class AsyncTaskQueue {
   // 任务的默认超时时间，单位为毫秒
   private defaultTimeout: number;
 
-  constructor(private defaultTimeout_: number = 2000) {
+  constructor(defaultTimeout_: number = 2000) {
     this.defaultTimeout = defaultTimeout_;
   }
 
@@ -153,7 +153,7 @@ export class AsyncTaskQueue {
         if (maybePromise != null) {
           // is promise
           try {
-            await withTimeout(maybePromise as any, timeout ?? 2000); // TODO avoid hardcoding
+            await withTimeout(maybePromise as any, timeout ?? this.defaultTimeout); // TODO avoid hardcoding
           } catch (error) {
             console.warn(error);
           }
