@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createPostApi } from "./utils";
-import { NormalizedDatabaseSchema } from "../types";
+import { NormalizedConfigSchema, NormalizedDatabaseSchema } from "../types";
 
 export const GetAllKbInfoSchema = {
   request: z.object({}),
@@ -10,5 +10,5 @@ export const GetAllKbInfoSchema = {
 export const getAllKbInfo = createPostApi(
   "/get-all-kb-info",
   z.object({}),
-  NormalizedDatabaseSchema.array(),
+  z.record(z.string(), NormalizedDatabaseSchema),
 );

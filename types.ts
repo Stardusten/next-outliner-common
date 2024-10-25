@@ -134,7 +134,7 @@ export const NormalizedConfigSchema = z.object({
   jwtSecret: z.string(),
   logger: z.boolean(),
   maxParamLength: z.number(),
-  databases: z.record(z.string(), DatabaseSchema),
+  databases: z.record(z.string(), NormalizedDatabaseSchema),
 });
 
 const ConfigSchema = NormalizedConfigSchema.partial();
