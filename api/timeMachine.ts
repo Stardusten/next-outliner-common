@@ -1,10 +1,8 @@
 import { z } from "zod";
-import { createPostApi } from "./utils";
+import { usePostApi } from "./utils";
 
 export const GetAllSavePointsSchema = {
-  request: z.object({
-    location: z.string(),
-  }),
+  request: z.object({}),
   result: z.object({
     savePointInfos: z.array(z.object({
       label: z.string(),
@@ -14,7 +12,7 @@ export const GetAllSavePointsSchema = {
   }),
 }
 
-export const getAllSavePoints = createPostApi(
+export const getAllSavePoints = usePostApi(
   "/get-all-save-points",
   GetAllSavePointsSchema.request,
   GetAllSavePointsSchema.result,
@@ -23,12 +21,11 @@ export const getAllSavePoints = createPostApi(
 export const CreateSavePointSchema = {
   request: z.object({
     label: z.string(),
-    location: z.string(),
   }),
   result: z.object({}),
 }
 
-export const createSavePoint = createPostApi(
+export const createSavePoint = usePostApi(
   "/create-save-point",
   CreateSavePointSchema.request,
   CreateSavePointSchema.result,
@@ -36,13 +33,12 @@ export const createSavePoint = createPostApi(
 
 export const DeleteSavePointSchema = {
   request: z.object({
-    location: z.string(),
     filename: z.string(),
   }),
   result: z.object({}),
 }
 
-export const deleteSavePoint = createPostApi(
+export const deleteSavePoint = usePostApi(
   "/delete-save-point",
   DeleteSavePointSchema.request,
   DeleteSavePointSchema.result,
@@ -50,14 +46,13 @@ export const deleteSavePoint = createPostApi(
 
 export const RenameSavePointSchema = {
   request: z.object({
-    location: z.string(),
     filename: z.string(),
     newLabel: z.string(),
   }),
   result: z.object({}),
   }
 
-export const renameSavePoint = createPostApi(
+export const renameSavePoint = usePostApi(
   "/rename-save-point",
   RenameSavePointSchema.request,
   RenameSavePointSchema.result,
