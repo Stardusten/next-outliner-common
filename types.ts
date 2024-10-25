@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { BLOCK_CONTENT_TYPES, RESP_CODES } from "./constants";
+import { logger } from "../modules/logger";
 
 // first 2 bits:
 //   00 - normal block
@@ -112,34 +113,40 @@ export type Resp<DATA> = {
   msg: string;
 };
 
-export const NormalizedDatabaseSchema = z.object({
-  name: z.string(),
-  location: z.string(),
-  attachmentsDir: z.string(),
-  imagesDir: z.string(),
-  musicDir: z.string(),
-  videoDir: z.string(),
-  documentDir: z.string(),
-});
-
-export const DatabaseSchema = NormalizedDatabaseSchema.pick({
-  name: true,
-  location: true,
-}).merge(NormalizedDatabaseSchema.partial());
-
-export const NormalizedConfigSchema = z.object({
-  host: z.string(),
-  port: z.number(),
-  password: z.string(),
+export const ConfigSchema = z.object({
+  host: z.string().default("0.0.0.0"),
+  port: z.number().default(8081),
   jwtSecret: z.string(),
-  logger: z.boolean(),
-  maxParamLength: z.number(),
-  databases: z.record(z.string(), NormalizedDatabaseSchema),
+  logger: z.boolean().default(true),
+  maxParamLength: z.number().default(500),
+  knowledgeBases: z.string().array().min(1),
+  newKnowledgeBasePathPrefix: z.string(),
 });
-
-const ConfigSchema = NormalizedConfigSchema.partial();
 
 export type Config = z.infer<typeof ConfigSchema>;
-export type NormalizedConfig = z.infer<typeof NormalizedConfigSchema>;
-export type Database = z.infer<typeof DatabaseSchema>;
-export type NormalizedDatabase = z.infer<typeof NormalizedDatabaseSchema>;
+
+export const KnowledgeBaseInfoSchema = z.object({
+  name: z.string(),
+  passwordHash: z.string(),
+  salt: z.string(),
+});
+
+export type KnowledgeBaseInfo = z.infer<typeof KnowledgeBaseInfoSchema>;
+
+export const JwtPayloadSchema = z.discriminatedUnion("role", [
+  z.object({
+    role: z.literal("admin")
+  }),
+  z.object({
+    role: z.literal("kb-editor"),
+    location: z.string(),
+  }),
+]);
+
+export const RoleTypeSchema = z.enum([
+  "admin",
+  "kb-editor",
+  "visitor",
+]);
+
+export type RoleType = z.infer<typeof RoleTypeSchema>;

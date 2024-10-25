@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createPostApi } from "./utils";
+import { usePostApi } from "./utils";
 
 export const FetchWebpageTitleSchema = {
   request: z.object({
@@ -10,7 +10,7 @@ export const FetchWebpageTitleSchema = {
   }),
 };
 
-export const fetchWebpageTitle = createPostApi(
+export const fetchWebpageTitle = usePostApi(
   "/fetch-webpage-title",
   FetchWebpageTitleSchema.request,
   FetchWebpageTitleSchema.result,
@@ -21,7 +21,7 @@ export const PingSchema = {
   result: z.object({}),
 };
 
-export const ping = createPostApi(
+export const ping = usePostApi(
   "/ping",
   PingSchema.request,
   PingSchema.result,

@@ -2,7 +2,10 @@ import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { z } from "zod";
 import { RESP_CODES } from "../constants";
 
-export const createPostApi = <PARAMS_SCHEMA extends z.ZodType, RESULT_SCHEMA extends z.ZodType>(
+export const usePostApi = <
+  PARAMS_SCHEMA extends z.ZodType,
+  RESULT_SCHEMA extends z.ZodType,
+>(
   endpoint: string,
   paramsSchema: PARAMS_SCHEMA,
   resultSchema: RESULT_SCHEMA,
