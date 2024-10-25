@@ -112,4 +112,31 @@ export type Resp<DATA> = {
   msg: string;
 };
 
-const x = 1 as Resp<string> & { code: 0 };
+export const NormalizedDatabaseSchema = z.object({
+  name: z.string(),
+  location: z.string(),
+  attachmentsDir: z.string(),
+  imagesDir: z.string(),
+  musicDir: z.string(),
+  videoDir: z.string(),
+  documentDir: z.string(),
+});
+
+export const DatabaseSchema = NormalizedDatabaseSchema.pick({
+  name: true,
+  location: true,
+}).merge(NormalizedDatabaseSchema.partial());
+
+export const NormalizedConfigSchema = z.object({
+  host: z.string(),
+  port: z.number(),
+  password: z.string(),
+  jwtSecret: z.string(),
+  logger: z.boolean(),
+  maxParamLength: z.number(),
+  databases: DatabaseSchema.array(),
+});
+
+const ConfigSchema = NormalizedConfigSchema.partial();
+
+export type Config = z.infer<typeof ConfigSchema>;
