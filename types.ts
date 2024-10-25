@@ -100,3 +100,46 @@ export type QueryContent = z.infer<typeof QueryContentSchema>;
 export type BlockInfo = z.infer<typeof BlockInfoSchema>;
 export type BlockData = z.infer<typeof BlockDataSchema>;
 export type SavePoint = z.infer<typeof SavePointSchema>;
+
+type NonZero<T extends number> = T extends 0 ? never : number extends T ? never : T;
+type Zero<T extends number> = T extends 0 ? number extends T ? never : T : never;
+
+export type Resp<DATA> = {
+  code: Zero<number>;
+  data: DATA;
+} | {
+  code: NonZero<number>;
+  msg: string;
+};
+
+export const NormalizedDatabaseSchema = z.object({
+  name: z.string(),
+  location: z.string(),
+  attachmentsDir: z.string(),
+  imagesDir: z.string(),
+  musicDir: z.string(),
+  videoDir: z.string(),
+  documentDir: z.string(),
+});
+
+export const DatabaseSchema = NormalizedDatabaseSchema.pick({
+  name: true,
+  location: true,
+}).merge(NormalizedDatabaseSchema.partial());
+
+export const NormalizedConfigSchema = z.object({
+  host: z.string(),
+  port: z.number(),
+  password: z.string(),
+  jwtSecret: z.string(),
+  logger: z.boolean(),
+  maxParamLength: z.number(),
+  databases: z.record(z.string(), DatabaseSchema),
+});
+
+const ConfigSchema = NormalizedConfigSchema.partial();
+
+export type Config = z.infer<typeof ConfigSchema>;
+export type NormalizedConfig = z.infer<typeof NormalizedConfigSchema>;
+export type Database = z.infer<typeof DatabaseSchema>;
+export type NormalizedDatabase = z.infer<typeof NormalizedDatabaseSchema>;
