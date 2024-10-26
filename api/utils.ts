@@ -1,6 +1,7 @@
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { z } from "zod";
 import { RESP_CODES } from "../constants";
+import { RespSchema } from "../types";
 
 export const usePostApi = <
   PARAMS_SCHEMA extends z.ZodType,
@@ -18,34 +19,31 @@ export const usePostApi = <
         axios = (globalThis as any).getAxios();
       } catch (error) {
         console.error(`[NO_AXIOS] ${error}`);
-        return { code: RESP_CODES.NO_AXIOS, data: undefined };
+        return { success: false, code: RESP_CODES.NO_AXIOS };
       }
 
       const res = await axios.post(endpoint, params, config);
       if (!res) {
         console.error(`[EMPTY_RESPONSE] endpoint=${endpoint}, params=${JSON.stringify(params)}`);
-        return { code: RESP_CODES.UNKNOWN_ERROR, data: undefined };
+        return { success: false, code: RESP_CODES.UNKNOWN_ERROR };
       }
 
-      const resSchema = z.object({
-        code: z.number(),
-        data: resultSchema.optional(),
-      });
+      const resSchema = RespSchema(resultSchema);
       const result = resSchema.safeParse(res.data);
 
       if (!result.success) {
         console.error(
           `[INVALID_RESPONSE] endpoint=${endpoint}, params=${JSON.stringify(params)}, response=${JSON.stringify(res.data)}, validationErrors=${JSON.stringify(result.error.errors)}`,
         );
-        return { code: RESP_CODES.INVALID_RESPONSE, data: undefined };
+        return { success: false, code: RESP_CODES.INVALID_RESPONSE };
       }
 
       return result.data;
     } catch (error) {
       console.error(
-        `[UNKNOWN_ERROR] endpoint=${endpoint}, params=${JSON.stringify(params)}, error=${JSON.stringify(error)}`,
+        `[UNKNOWN_ERROR] endpoint=${endpoint}, params=${JSON.stringify(params)}, error=$`, error,
       );
-      return { code: RESP_CODES.UNKNOWN_ERROR, data: undefined };
+      return { success: false, code: RESP_CODES.UNKNOWN_ERROR };
     }
   };
 };

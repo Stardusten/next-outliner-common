@@ -16,7 +16,7 @@ export const BLOCK_TYPE_ZH_NAMES = [
   "查询",
 ];
 
-const _RESP_CODES = {
+export const _RESP_CODES = {
   SUCCESS: 0,
   INVALID_REQUEST: 1,
   PASSWORD_INCORRECT: 2,
@@ -28,7 +28,7 @@ const _RESP_CODES = {
   NO_AXIOS: 8,
 } as const;
 
-const RESP_CODES_NAMES: {
+export const RESP_CODES_NAMES: {
   [K in keyof typeof _RESP_CODES as (typeof _RESP_CODES)[K]]: K
 } = Object.fromEntries(Object.entries(_RESP_CODES)
   .map(([key, val]) => [val, key])) as any;

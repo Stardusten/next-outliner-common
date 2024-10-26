@@ -1,6 +1,5 @@
 import { z } from "zod";
-import { BLOCK_CONTENT_TYPES, RESP_CODES } from "./constants";
-import { logger } from "../modules/logger";
+import { BLOCK_CONTENT_TYPES, RESP_CODES_NAMES, _RESP_CODES } from "./constants";
 
 // first 2 bits:
 //   00 - normal block
@@ -78,17 +77,12 @@ export const BlockDataSchema = z.tuple([
 export const SavePointSchema_v2 = z.object({
   schema: z.literal("v2"),
   blockInfos: z.record(BlockIdSchema, BlockInfoSchema),
-  blockDataDocs: z.record(
-    DataDocIdSchema,
-    z.record(BlockIdSchema, BlockDataSchema),
-  ),
+  blockDataDocs: z.record(DataDocIdSchema, z.record(BlockIdSchema, BlockDataSchema)),
   label: z.string(),
   createdAt: z.coerce.date(),
 });
 
-export const SavePointSchema = z.discriminatedUnion("schema", [
-  SavePointSchema_v2,
-]);
+export const SavePointSchema = z.discriminatedUnion("schema", [SavePointSchema_v2]);
 
 export type BlockStatus = z.infer<typeof BlockStatusSchema>;
 export type BlockId = string;
@@ -102,15 +96,11 @@ export type BlockInfo = z.infer<typeof BlockInfoSchema>;
 export type BlockData = z.infer<typeof BlockDataSchema>;
 export type SavePoint = z.infer<typeof SavePointSchema>;
 
-type NonZero<T extends number> = T extends 0 ? never : number extends T ? never : T;
-type Zero<T extends number> = T extends 0 ? number extends T ? never : T : never;
-
-export type Resp<DATA> = {
-  code: Zero<number>;
-  data: DATA;
-} | {
-  code: NonZero<number>;
-  msg: string;
+export const RespSchema = (dataSchema: z.AnyZodObject) => {
+  return z.discriminatedUnion("success", [
+    z.object({ success: z.literal(true), data: dataSchema }),
+    z.object({ success: z.literal(false), code: z.number(), msg: z.string().optional() }),
+  ]);
 };
 
 export const ConfigSchema = z.object({
@@ -135,7 +125,7 @@ export type KnowledgeBaseInfo = z.infer<typeof KnowledgeBaseInfoSchema>;
 
 export const JwtPayloadSchema = z.discriminatedUnion("role", [
   z.object({
-    role: z.literal("admin")
+    role: z.literal("admin"),
   }),
   z.object({
     role: z.literal("kb-editor"),
@@ -143,10 +133,6 @@ export const JwtPayloadSchema = z.discriminatedUnion("role", [
   }),
 ]);
 
-export const RoleTypeSchema = z.enum([
-  "admin",
-  "kb-editor",
-  "visitor",
-]);
+export const RoleTypeSchema = z.enum(["admin", "kb-editor", "visitor"]);
 
 export type RoleType = z.infer<typeof RoleTypeSchema>;
