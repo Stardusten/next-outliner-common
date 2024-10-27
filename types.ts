@@ -96,12 +96,16 @@ export type BlockInfo = z.infer<typeof BlockInfoSchema>;
 export type BlockData = z.infer<typeof BlockDataSchema>;
 export type SavePoint = z.infer<typeof SavePointSchema>;
 
-export const RespSchema = (dataSchema: z.AnyZodObject) => {
+export const RespSchema = (dataSchema: z.ZodType) => {
   return z.discriminatedUnion("success", [
     z.object({ success: z.literal(true), data: dataSchema }),
     z.object({ success: z.literal(false), code: z.number(), msg: z.string().optional() }),
   ]);
 };
+
+export type Resp<DATA> =
+  | { success: true; data: DATA }
+  | { success: false; code: keyof typeof RESP_CODES_NAMES; msg?: string };
 
 export const ConfigSchema = z.object({
   host: z.string().default("0.0.0.0"),
@@ -126,9 +130,11 @@ export type KnowledgeBaseInfo = z.infer<typeof KnowledgeBaseInfoSchema>;
 export const JwtPayloadSchema = z.discriminatedUnion("role", [
   z.object({
     role: z.literal("admin"),
+    serverUrl: z.string(),
   }),
   z.object({
     role: z.literal("kb-editor"),
+    serverUrl: z.string(),
     location: z.string(),
   }),
 ]);

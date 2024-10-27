@@ -1,17 +1,17 @@
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { z } from "zod";
 import { RESP_CODES } from "../constants";
-import { RespSchema } from "../types";
+import { RespSchema, type Resp } from "../types";
 
-export const usePostApi = <
-  PARAMS_SCHEMA extends z.ZodType,
-  RESULT_SCHEMA extends z.ZodType,
->(
+export const usePostApi = <PARAMS_SCHEMA extends z.ZodType, RESULT_SCHEMA extends z.ZodType>(
   endpoint: string,
   paramsSchema: PARAMS_SCHEMA,
   resultSchema: RESULT_SCHEMA,
 ) => {
-  return async (params: z.infer<PARAMS_SCHEMA>, config?: AxiosRequestConfig) => {
+  return async (
+    params: z.infer<PARAMS_SCHEMA>,
+    config?: AxiosRequestConfig,
+  ): Promise<Resp<z.infer<RESULT_SCHEMA>>> => {
     try {
       // 要使用这个函数，必须将 axios 的 getter 挂载到 globalThis 上
       let axios: AxiosInstance;
@@ -38,10 +38,11 @@ export const usePostApi = <
         return { success: false, code: RESP_CODES.INVALID_RESPONSE };
       }
 
-      return result.data;
+      return result.data as any; // XXX
     } catch (error) {
       console.error(
-        `[UNKNOWN_ERROR] endpoint=${endpoint}, params=${JSON.stringify(params)}, error=$`, error,
+        `[UNKNOWN_ERROR] endpoint=${endpoint}, params=${JSON.stringify(params)}, error=$`,
+        error,
       );
       return { success: false, code: RESP_CODES.UNKNOWN_ERROR };
     }
