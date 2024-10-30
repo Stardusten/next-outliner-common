@@ -72,3 +72,14 @@ export const fsUpload = usePostApi(
   FsUploadSchema.request,
   FsUploadSchema.result,
 );
+
+export const fsEnsureAttachmentsDirSchema = {
+  request: z.object({}),
+  result: z.any(),
+}
+
+export const fsEnsureAttachmentsDir = usePostApi(
+  `${PREFIX}/ensure-attachments-dir`,
+  fsEnsureAttachmentsDirSchema.request,
+  fsEnsureAttachmentsDirSchema.result,
+);
