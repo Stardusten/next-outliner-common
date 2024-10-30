@@ -37,7 +37,7 @@ export const FsStatSchema = {
   }),
 }
 
-export const UploadSchema = {
+export const FsUploadSchema = {
   request: z.object({
     // 是否覆盖已存在的文件
     overwrite: z.boolean().optional(),
