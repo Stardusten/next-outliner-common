@@ -16,7 +16,7 @@ export const DirentSchema = z.discriminatedUnion("isDirectory", [
   }),
 ]) as z.ZodType<Dirent>;
 
-export const LsSchema = {
+export const FsLsSchema = {
   request: z.object({
     basePath: z.string(),
     includeHidden: z.boolean().optional(),
@@ -26,7 +26,7 @@ export const LsSchema = {
   result: z.array(DirentSchema),
 }
 
-export const StatSchema = {
+export const FsStatSchema = {
   request: z.object({
     path: z.string(),
   }),
