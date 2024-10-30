@@ -6,21 +6,26 @@ import { RespSchema } from "../types";
 
 const PREFIX = "/fs";
 
-export type Dirent =
-  | { isDirectory: true; name: string; subDirents: Dirent[] }
-  | { isDirectory: false; name: string };
+export type Dirents = Record<
+  string,
+  | { isDirectory: true; name: string; subDirents: Dirents }
+  | { isDirectory: false; name: string }
+>;
 
-export const DirentSchema = z.discriminatedUnion("isDirectory", [
-  z.object({
-    isDirectory: z.literal(true),
-    name: z.string(),
-    subDirents: z.lazy(() => z.array(DirentSchema)),
-  }),
-  z.object({
-    isDirectory: z.literal(false),
-    name: z.string(),
-  }),
-]) as z.ZodType<Dirent>;
+export const DirentsSchema = z.record(
+  z.string(),
+  z.discriminatedUnion("isDirectory", [
+    z.object({
+      isDirectory: z.literal(true),
+      name: z.string(),
+      subDirents: z.lazy(() => DirentsSchema),
+    }),
+    z.object({
+      isDirectory: z.literal(false),
+      name: z.string(),
+    }),
+  ]),
+) as z.ZodType<Dirents>;
 
 export const FsLsSchema = {
   request: z.object({
@@ -29,8 +34,8 @@ export const FsLsSchema = {
     recursive: z.boolean().optional(),
     maxDepth: z.number().optional(),
   }),
-  result: z.array(DirentSchema),
-}
+  result: DirentsSchema,
+};
 
 export const fsLs = usePostApi(
   `${PREFIX}/ls`,
