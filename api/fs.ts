@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { usePostApi } from "./utils";
+
+const PREFIX = "/fs";
 
 export type Dirents = Record<
   string,
@@ -31,6 +34,12 @@ export const FsLsSchema = {
   result: DirentsSchema,
 };
 
+export const fsLs = usePostApi(
+  `${PREFIX}/ls`,
+  FsLsSchema.request,
+  FsLsSchema.result,
+);
+
 export const FsStatSchema = {
   request: z.object({
     path: z.string(),
@@ -40,7 +49,13 @@ export const FsStatSchema = {
     mtime: z.coerce.date(),
     size: z.number(),
   }),
-};
+}
+
+export const fsStat = usePostApi(
+  `${PREFIX}/stat`,
+  FsStatSchema.request,
+  FsStatSchema.result,
+);
 
 export const FsUploadSchema = {
   request: z.object({
@@ -50,4 +65,10 @@ export const FsUploadSchema = {
     mkdir: z.boolean().optional(),
   }),
   result: z.any(),
-};
+}
+
+export const fsUpload = usePostApi(
+  `${PREFIX}/upload`,
+  FsUploadSchema.request,
+  FsUploadSchema.result,
+);
