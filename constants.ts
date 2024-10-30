@@ -26,6 +26,8 @@ export const _RESP_CODES = {
   TARGET_NOT_FOUND: 6,
   INVALID_RESPONSE: 7,
   NO_AXIOS: 8,
+  FILE_EXISTS: 9,
+  DIR_NOT_FOUND: 10,
 } as const;
 
 export const RESP_CODES_NAMES: {
