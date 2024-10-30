@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { usePostApi } from "./utils";
+
+const PREFIX = "/fs";
 
 export type Dirent =
   | { isDirectory: true; name: string; subDirents: Dirent[] }
@@ -26,6 +29,12 @@ export const FsLsSchema = {
   result: z.array(DirentSchema),
 }
 
+export const fsLs = usePostApi(
+  `${PREFIX}/ls`,
+  FsLsSchema.request,
+  FsLsSchema.result,
+);
+
 export const FsStatSchema = {
   request: z.object({
     path: z.string(),
@@ -37,6 +46,12 @@ export const FsStatSchema = {
   }),
 }
 
+export const fsStat = usePostApi(
+  `${PREFIX}/stat`,
+  FsStatSchema.request,
+  FsStatSchema.result,
+);
+
 export const FsUploadSchema = {
   request: z.object({
     // 是否覆盖已存在的文件
@@ -46,3 +61,9 @@ export const FsUploadSchema = {
   }),
   result: z.any(),
 }
+
+export const fsUpload = usePostApi(
+  `${PREFIX}/upload`,
+  FsUploadSchema.request,
+  FsUploadSchema.result,
+);
