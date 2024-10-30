@@ -1,5 +1,8 @@
 import { z } from "zod";
 import { usePostApi } from "./utils";
+import type { AxiosInstance } from "axios";
+import { RESP_CODES } from "../constants";
+import { RespSchema } from "../types";
 
 const PREFIX = "/fs";
 
@@ -59,11 +62,53 @@ export const FsUploadSchema = {
     // 是否创建不存在的目录
     mkdir: z.boolean().optional(),
   }),
-  result: z.any(),
+  result: z.undefined(),
 }
 
-export const fsUpload = usePostApi(
-  `${PREFIX}/upload`,
-  FsUploadSchema.request,
-  FsUploadSchema.result,
-);
+/**
+ * @param files [targetPath, File][]
+ */
+export const fsUpload = async (files: [string, File][], config?: z.infer<typeof FsUploadSchema.request>) => {
+  const endpoint = `${PREFIX}/upload`;
+  try {
+    // 要使用这个函数，必须将 axios 的 getter 挂载到 globalThis 上
+    let axios: AxiosInstance;
+    try {
+      axios = (globalThis as any).getAxios();
+    } catch (error) {
+      console.error(`[NO_AXIOS] ${error}`);
+      return { success: false, code: RESP_CODES.NO_AXIOS };
+    }
+
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append("targetPath", file[0]);
+      formData.append("file", file[1]);
+    });
+
+    const res = await axios.post(endpoint, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      params: config,
+    });
+
+    if (!res) {
+      console.error(`[EMPTY_RESPONSE] endpoint=${endpoint}`);
+      return { success: false, code: RESP_CODES.UNKNOWN_ERROR };
+    }
+
+    const resSchema = RespSchema(FsUploadSchema.result);
+    const result = resSchema.safeParse(res.data);
+
+    if (!result.success) {
+      console.error(`[INVALID_RESPONSE] endpoint=${endpoint}}, response=${JSON.stringify(res.data)}, validationErrors=${JSON.stringify(result.error.errors)}`);
+      return { success: false, code: RESP_CODES.INVALID_RESPONSE };
+    }
+
+    return { success: true, code: RESP_CODES.SUCCESS };
+  } catch (error) {
+    console.error(`[UNKNOWN_ERROR] endpoint=${endpoint}}, error=${error}`);
+    return { success: false, code: RESP_CODES.UNKNOWN_ERROR };
+  }
+}
