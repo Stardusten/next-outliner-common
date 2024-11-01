@@ -117,3 +117,14 @@ export const fsUpload = async (files: [string, File][], config?: z.infer<typeof 
     return { success: false, code: RESP_CODES.UNKNOWN_ERROR };
   }
 }
+
+export const FsEnsureAttachmentsDirSchema = {
+  request: z.object({}),
+  result: z.any(),
+}
+
+export const fsEnsureAttachmentsDir = usePostApi(
+  `${PREFIX}/ensure-attachments-dir`,
+  FsEnsureAttachmentsDirSchema.request,
+  FsEnsureAttachmentsDirSchema.result,
+);
