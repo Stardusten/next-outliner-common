@@ -128,3 +128,19 @@ export const fsEnsureAttachmentsDir = usePostApi(
   FsEnsureAttachmentsDirSchema.request,
   FsEnsureAttachmentsDirSchema.result,
 );
+
+export const FsGetAttachmentSignedUrlSchema = {
+  request: z.object({
+    path: z.string(),
+  }),
+  result: z.object({
+    signedUrl: z.string(),
+  }),
+};
+
+export const fsGetAttachmentSignedUrl = usePostApi(
+  `${PREFIX}/get-attachment-signed-url`,
+  FsGetAttachmentSignedUrlSchema.request,
+  FsGetAttachmentSignedUrlSchema.result,
+);
+

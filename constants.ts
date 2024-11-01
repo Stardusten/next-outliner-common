@@ -28,6 +28,7 @@ export const _RESP_CODES = {
   NO_AXIOS: 8,
   FILE_EXISTS: 9,
   DIR_NOT_FOUND: 10,
+  TOKEN_EXPIRED: 11,
 } as const;
 
 export const RESP_CODES_NAMES: {
