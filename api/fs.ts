@@ -118,20 +118,22 @@ export const fsUpload = async (files: [string, File][], config?: z.infer<typeof 
   }
 }
 
-export const FsEnsureAttachmentsDirSchema = {
+export const fsEnsureAttachmentsDirSchema = {
   request: z.object({}),
   result: z.any(),
 }
 
 export const fsEnsureAttachmentsDir = usePostApi(
   `${PREFIX}/ensure-attachments-dir`,
-  FsEnsureAttachmentsDirSchema.request,
-  FsEnsureAttachmentsDirSchema.result,
+  fsEnsureAttachmentsDirSchema.request,
+  fsEnsureAttachmentsDirSchema.result,
 );
 
 export const FsGetAttachmentSignedUrlSchema = {
   request: z.object({
     path: z.string(),
+    attachment: z.boolean().optional(),
+    inferMimeType: z.boolean().optional(),
   }),
   result: z.object({
     signedUrl: z.string(),
