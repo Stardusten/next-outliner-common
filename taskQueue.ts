@@ -80,7 +80,15 @@ export class AsyncTaskQueue {
           description,
         });
       } else {
-        this.queue.push({ id, callback, type: type ?? "null", canceller, timeout, checker, description });
+        this.queue.push({
+          id,
+          callback,
+          type: type ?? "null",
+          canceller,
+          timeout,
+          checker,
+          description,
+        });
       }
     } else {
       if (recursive) {
@@ -127,7 +135,6 @@ export class AsyncTaskQueue {
   }
 
   async _processQueue(targetId: number) {
-    // console.log('try process', targetId, this.queue);
     if (this.queue.length === 0) {
       return;
     }
@@ -143,10 +150,8 @@ export class AsyncTaskQueue {
     const { id, callback, canceller, recursive, checker, timeout, description } = task;
 
     this.ongoingTask = task;
-    // console.log("start processing task", id);
 
     canceller && canceller();
-    // console.log("start executing task", task.id);
     if (!checker || checker()) {
       try {
         const maybePromise = callback();
@@ -162,23 +167,18 @@ export class AsyncTaskQueue {
         console.error(error);
       }
     }
-    console.log(`[AsyncTaskQueue] Task (${id}) ${description ?? ""} finished`);
-    // console.log(task.id, "finished");
 
     this.ongoingTask = null;
-    // console.log("process task", id, "finished");
 
     if (id !== targetId) {
       await this._processQueue(targetId);
     }
 
     // task targetId should be finished here
-    // console.log("giveupQueue", this.giveupQueue)
     if (!recursive && this.giveupQueue.length > 0) {
       queueMicrotask(() => {
         for (const id of this.giveupQueue) {
           const targetId = this.giveupQueue.shift();
-          // console.log("try giveup task", id, targetId)
           targetId && this._processQueue(id);
         }
       });

@@ -23,6 +23,7 @@ export const ImageContentSchema = z.tuple([
   z.enum(["left", "center"]), // align
   z.string().nullable(), // caption
   z.number().nullable(), // width
+  z.array(z.enum(["blend", "circle", "invert", "invertW", "outline", "blendLuminosity"])).nullish(), // filters
 ]);
 
 export const CodeContentSchema = z.tuple([

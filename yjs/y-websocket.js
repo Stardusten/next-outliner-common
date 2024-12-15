@@ -41,7 +41,11 @@ messageHandlers[messageSync] = (encoder, decoder, provider, emitSynced, _message
 
   encoding.writeVarUint(encoder, messageSync);
   encoding.writeVarString(encoder, docGuid);
-  const syncMessageType = syncProtocol.readSyncMessage(decoder, encoder, doc, provider);
+  // 在这里设置 origin
+  const syncMessageType = syncProtocol.readSyncMessage(decoder, encoder, doc, {
+    type: "remote",
+    changeSources: [provider],
+  });
 
   console.log(`recv messageSync,  docGuid=${docGuid}, type=${syncMessageType}`);
 
@@ -142,7 +146,7 @@ const setupWS = (provider) => {
       if (provider.wsconnected) {
         provider.wsconnected = false;
         provider.synced = false;
-        provider.emit("status", [{status: "disconnected"}]);
+        provider.emit("status", [{ status: "disconnected" }]);
       } else {
         provider.wsUnsuccessfulReconnects++;
       }

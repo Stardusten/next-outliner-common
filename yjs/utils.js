@@ -11,12 +11,8 @@ import debounce from "lodash.debounce";
 
 import { callbackHandler, isCallbackSet } from "./callback";
 
-const CALLBACK_DEBOUNCE_WAIT = parseInt(
-  process.env.CALLBACK_DEBOUNCE_WAIT || "2000",
-);
-const CALLBACK_DEBOUNCE_MAXWAIT = parseInt(
-  process.env.CALLBACK_DEBOUNCE_MAXWAIT || "10000",
-);
+const CALLBACK_DEBOUNCE_WAIT = parseInt(process.env.CALLBACK_DEBOUNCE_WAIT || "2000");
+const CALLBACK_DEBOUNCE_MAXWAIT = parseInt(process.env.CALLBACK_DEBOUNCE_MAXWAIT || "10000");
 
 const wsReadyStateConnecting = 0;
 const wsReadyStateOpen = 1;
@@ -103,9 +99,7 @@ const messageAwareness = 1;
  * @param {any} _tr
  */
 const updateHandler = (update, _origin, doc, _tr) => {
-  console.log(
-    `detect update on ${doc.guid}, send messageUpdate to ${doc.conns.size} conns`,
-  );
+  console.log(`detect update on ${doc.guid}, send messageUpdate to ${doc.conns.size} conns`);
   const encoder = encoding.createEncoder();
   encoding.writeVarUint(encoder, messageSync);
   encoding.writeVarString(encoder, doc.guid);
@@ -144,9 +138,7 @@ export class WSSharedDoc extends Y.Doc {
     const awarenessChangeHandler = ({ added, updated, removed }, conn) => {
       const changedClients = added.concat(updated, removed);
       if (conn !== null) {
-        const connControlledIDs = /** @type {Set<number>} */ (
-          this.conns.get(conn)
-        );
+        const connControlledIDs = /** @type {Set<number>} */ (this.conns.get(conn));
         if (connControlledIDs !== undefined) {
           added.forEach((clientID) => {
             connControlledIDs.add(clientID);
@@ -239,11 +231,7 @@ const messageListener = async (conn, doc, ldbLocation, message) => {
 
         if (docGuid !== doc.guid) {
           // subdoc XXX
-          targetDoc = getYDoc(
-            docGuid.slice(ldbLocation.length),
-            ldbLocation,
-            false,
-          );
+          targetDoc = getYDoc(docGuid.slice(ldbLocation.length), ldbLocation, false);
 
           // 等待 load 完成后才开始处理消息
           const loadPromise = loadPromiseMap.get(docGuid);
@@ -254,9 +242,7 @@ const messageListener = async (conn, doc, ldbLocation, message) => {
 
           if (!targetDoc.conns.has(conn)) targetDoc.conns.set(conn, new Set());
 
-          /**@type {Map<String, Boolean>}*/ const subm = subdocsMap.get(
-            doc.guid,
-          );
+          /**@type {Map<String, Boolean>}*/ const subm = subdocsMap.get(doc.guid);
           if (subm && subm.has(targetDoc.guid)) {
             // sync step 1 done before.
           } else {
@@ -334,11 +320,7 @@ const closeConn = (doc, conn) => {
     // @ts-ignore
     const controlledIds = doc.conns.get(conn);
     doc.conns.delete(conn);
-    awarenessProtocol.removeAwarenessStates(
-      doc.awareness,
-      Array.from(controlledIds),
-      null,
-    );
+    awarenessProtocol.removeAwarenessStates(doc.awareness, Array.from(controlledIds), null);
     if (doc.conns.size === 0) {
       const persistence = getPersistence(doc.location);
       if (persistence !== null) {
@@ -360,10 +342,7 @@ const closeConn = (doc, conn) => {
  * @param {Uint8Array} m
  */
 const send = (doc, conn, m) => {
-  if (
-    conn.readyState !== wsReadyStateConnecting &&
-    conn.readyState !== wsReadyStateOpen
-  ) {
+  if (conn.readyState !== wsReadyStateConnecting && conn.readyState !== wsReadyStateOpen) {
     closeConn(doc, conn);
   }
   try {
@@ -403,9 +382,6 @@ export const setupWSConnection = (
   let pongReceived = true;
   const pingInterval = setInterval(() => {
     if (!pongReceived) {
-      if (doc.conns.has(conn)) {
-        closeConn(doc, conn);
-      }
       clearInterval(pingInterval);
     } else if (doc.conns.has(conn)) {
       pongReceived = false;
@@ -440,10 +416,7 @@ export const setupWSConnection = (
       encoding.writeVarUint(encoder, messageAwareness);
       encoding.writeVarUint8Array(
         encoder,
-        awarenessProtocol.encodeAwarenessUpdate(
-          doc.awareness,
-          Array.from(awarenessStates.keys()),
-        ),
+        awarenessProtocol.encodeAwarenessUpdate(doc.awareness, Array.from(awarenessStates.keys())),
       );
       send(doc, conn, encoding.toUint8Array(encoder));
     }
