@@ -1,9 +1,21 @@
 import { withTimeout } from "@/utils/time";
 
-export type AsyncTask = {
+// 任务的元数据，用于描述任务的属性
+type TaskMeta = {
+  description?: string;
+  [key: string]: any;
+};
+
+// 任务的 callback 在执行时，会作为参数传入的一些信息
+// 用于让 callback 在执行时感知其被执行的上下文
+type TaskAwareness = {
+  mergedTasks: AsyncTask[];
+};
+
+type AsyncTask = {
   id: number;
   // 任务的执行函数
-  callback: () => void | Promise<void>;
+  callback: (awareness: TaskAwareness) => void | Promise<void>;
   // 任务的检查函数，如果返回 false，则任务会被跳过
   // 因为一个任务很可能会被已有任务阻塞，因此有时需要检查任务得到处理机时是否仍然需要执行
   checker?: () => boolean;
@@ -16,7 +28,17 @@ export type AsyncTask = {
   recursive?: boolean;
   // 任务的超时时间，单位为毫秒
   timeout?: number;
-  description?: string;
+  meta?: TaskMeta;
+  awareness: TaskAwareness;
+};
+
+export type TaskOptions = {
+  type?: string;
+  delay?: number;
+  debounce?: boolean;
+  checker?: () => boolean;
+  timeout?: number;
+  meta?: TaskMeta;
 };
 
 export class AsyncTaskQueue {
@@ -32,27 +54,20 @@ export class AsyncTaskQueue {
     this.defaultTimeout = defaultTimeout_;
   }
 
-  addTask(
-    callback: () => void | Promise<void>,
-    options: {
-      type?: string;
-      delay?: number;
-      debounce?: boolean;
-      checker?: () => boolean;
-      timeout?: number;
-      description?: string;
-    } = {},
-  ) {
-    const { type, delay, debounce, checker, timeout, description } = options;
+  addTask(callback: (awareness: TaskAwareness) => void | Promise<void>, options: TaskOptions = {}) {
+    const { type, delay, debounce, checker, timeout, meta } = options;
     const id = this.id++;
     // console.log("add task", id);
     // if debounce == true, find a task with the same type in queue to merge
+    let mergedTasks: AsyncTask[] = [];
     if (debounce && type != "null") {
       const idx = this.queue.findIndex((item) => item.type == type);
       if (idx !== -1) {
         const task = this.queue[idx];
         task.canceller && task.canceller();
         this.queue.splice(idx, 1);
+        mergedTasks.push(...task.awareness.mergedTasks);
+        mergedTasks.push(task);
       }
     }
     // detect recursion
@@ -77,7 +92,8 @@ export class AsyncTaskQueue {
           recursive: true,
           checker,
           timeout,
-          description,
+          meta,
+          awareness: { mergedTasks },
         });
       } else {
         this.queue.push({
@@ -87,7 +103,8 @@ export class AsyncTaskQueue {
           canceller,
           timeout,
           checker,
-          description,
+          meta,
+          awareness: { mergedTasks },
         });
       }
     } else {
@@ -99,17 +116,26 @@ export class AsyncTaskQueue {
           recursive: true,
           checker,
           timeout,
-          description,
+          meta,
+          awareness: { mergedTasks },
         });
       } else {
-        this.queue.push({ id, callback, type: type ?? "null", checker, timeout, description });
+        this.queue.push({
+          id,
+          callback,
+          type: type ?? "null",
+          checker,
+          timeout,
+          meta,
+          awareness: { mergedTasks },
+        });
       }
       this._processQueue(id);
     }
   }
 
   async addTaskAndWait(
-    callback: () => void | Promise<void>,
+    callback: (awareness: TaskAwareness) => void | Promise<void>,
     options: {
       type?: string;
       delay?: number;
@@ -120,8 +146,8 @@ export class AsyncTaskQueue {
     } = {},
   ) {
     return new Promise((resolve) => {
-      const wrappedTask = async () => {
-        await callback();
+      const wrappedTask = async (awareness: TaskAwareness) => {
+        await callback(awareness);
         resolve(undefined);
       };
 
@@ -147,14 +173,15 @@ export class AsyncTaskQueue {
     }
 
     const task = this.queue.shift()!;
-    const { id, callback, canceller, recursive, checker, timeout, description } = task;
+    const { id, callback, canceller, recursive, checker, timeout, meta, awareness } = task;
 
     this.ongoingTask = task;
 
     canceller && canceller();
     if (!checker || checker()) {
       try {
-        const maybePromise = callback();
+        console.log("callback", awareness);
+        const maybePromise = callback(awareness);
         if (maybePromise != null) {
           // is promise
           try {
