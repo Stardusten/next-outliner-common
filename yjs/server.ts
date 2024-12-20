@@ -51,7 +51,7 @@ type LdbController = {
 export const BASE_DOC_NAME = "baseDoc";
 
 // location -> [baseDoc, (docName -> doc)]
-const docs = new Map<string, [Y.Doc, Map<string, Y.Doc>]>();
+export const docs = new Map<string, [Y.Doc, Map<string, Y.Doc>]>();
 
 // location -> leveldbPersistence
 const ldbControllers = new Map<string, LdbController>();
@@ -77,6 +77,22 @@ const getLdbController = (location: string) => {
     const controller: LdbController = {
       ldb,
       bindDoc: async (docName: string, doc: Y.Doc) => {
+        //////////////// Migration ////////////////
+        const allDocNames = await ldb.getAllDocNames();
+        if (allDocNames.includes("base")) {
+          const baseDoc = await ldb.getYDoc("base");
+          await ldb.clearDocument("base");
+          await ldb.storeUpdate(BASE_DOC_NAME, Y.encodeStateAsUpdate(baseDoc));
+          console.log("Migration done");
+          const newBaseDoc = await ldb.getYDoc(BASE_DOC_NAME);
+          console.log(
+            "newBaseDoc size",
+            newBaseDoc.getMap("blockInfoMap").size,
+          );
+          process.exit(1);
+        }
+        ///////////////////////////////////////////
+
         // 从数据库中取得 db，并于互相更新
         const docInDb = await ldb.getYDoc(docName);
         const newUpdates = Y.encodeStateAsUpdate(doc);
@@ -113,7 +129,8 @@ const getBaseDoc = (location: string, gc: boolean = true) => {
 
 const getOtherDoc = (location: string, docName: string, gc: boolean = true) => {
   const [baseDoc, otherDocs] = docs.get(location) ?? [];
-  if (!baseDoc || !otherDocs) throw new Error(`Base doc not found for location ${location}`);
+  if (!baseDoc || !otherDocs)
+    throw new Error(`Base doc not found for location ${location}`);
 
   const doc = otherDocs.get(docName);
   if (!doc) {
@@ -150,8 +167,16 @@ const sendSyncStep1 = (location: string, doc: Y.Doc, conn: WebSocket) => {
   send(location, doc, conn, encoding.toUint8Array(encoder));
 };
 
-const send = (location: string, doc: Y.Doc, conn: WebSocket, msg: Uint8Array) => {
-  if (conn.readyState !== WsStates.readyConnecting && conn.readyState !== WsStates.readyOpen) {
+const send = (
+  location: string,
+  doc: Y.Doc,
+  conn: WebSocket,
+  msg: Uint8Array,
+) => {
+  if (
+    conn.readyState !== WsStates.readyConnecting &&
+    conn.readyState !== WsStates.readyOpen
+  ) {
     closeConn(location, doc, conn);
   }
   try {
@@ -172,7 +197,11 @@ const needSend = (encoder: encoding.Encoder) => {
   return decoding.hasContent(decoder);
 };
 
-const _msgHandler = async (conn: WebSocket, location: string, msg: Uint8Array) => {
+const _msgHandler = async (
+  conn: WebSocket,
+  location: string,
+  msg: Uint8Array,
+) => {
   try {
     const encoder = encoding.createEncoder();
     const decoder = decoding.createDecoder(msg);
@@ -202,7 +231,12 @@ const _msgHandler = async (conn: WebSocket, location: string, msg: Uint8Array) =
         // 回复收到的消息
         encoding.writeVarUint(encoder, MsgTypes.msgSync);
         encoding.writeVarString(encoder, doc.guid);
-        const msgType = syncProtocol.readSyncMessage(decoder, encoder, doc, conn);
+        const msgType = syncProtocol.readSyncMessage(
+          decoder,
+          encoder,
+          doc,
+          conn,
+        );
         console.debug(`recv msgType: ${msgType}, docGuid: ${docGuid}`);
 
         // 判断是否需要回复，readSyncMessage 算出来是空消息就不用回复了
@@ -227,10 +261,16 @@ const _msgHandler = async (conn: WebSocket, location: string, msg: Uint8Array) =
 };
 
 const registerMsgHandler = (conn: WebSocket, location: string) => {
-  conn.on("message", (msg) => _msgHandler(conn, location, new Uint8Array(msg as any)));
+  conn.on("message", (msg) =>
+    _msgHandler(conn, location, new Uint8Array(msg as any)),
+  );
 };
 
-const registerAliveChecker = (conn: WebSocket, location: string, doc: Y.Doc) => {
+const registerAliveChecker = (
+  conn: WebSocket,
+  location: string,
+  doc: Y.Doc,
+) => {
   let pongReceived = true;
   const pingInterval = setInterval(() => {
     if (!pongReceived) {
@@ -273,7 +313,11 @@ const registerUpdateListener = (location: string, doc: Y.Doc) => {
   });
 };
 
-const setupWsConnection = (conn: WebSocket, req: IncomingMessage, opts: WsConnectionOpts) => {
+const setupWsConnection = (
+  conn: WebSocket,
+  req: IncomingMessage,
+  opts: WsConnectionOpts,
+) => {
   const { location, gc } = opts;
 
   console.debug("setupWsConnection", location, gc);

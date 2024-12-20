@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { BLOCK_CONTENT_TYPES, RESP_CODES_NAMES, _RESP_CODES } from "./constants";
+import {
+  BLOCK_CONTENT_TYPES,
+  RESP_CODES_NAMES,
+  _RESP_CODES,
+} from "./constants";
 
 // first 2 bits:
 //   00 - normal block
@@ -23,7 +27,18 @@ export const ImageContentSchema = z.tuple([
   z.enum(["left", "center"]), // align
   z.string().nullable(), // caption
   z.number().nullable(), // width
-  z.array(z.enum(["blend", "circle", "invert", "invertW", "outline", "blendLuminosity"])).nullish(), // filters
+  z
+    .array(
+      z.enum([
+        "blend",
+        "circle",
+        "invert",
+        "invertW",
+        "outline",
+        "blendLuminosity",
+      ]),
+    )
+    .nullish(), // filters
 ]);
 
 export const CodeContentSchema = z.tuple([
@@ -78,12 +93,17 @@ export const BlockDataSchema = z.tuple([
 export const SavePointSchema_v2 = z.object({
   schema: z.literal("v2"),
   blockInfos: z.record(BlockIdSchema, BlockInfoSchema),
-  blockDataDocs: z.record(DataDocIdSchema, z.record(BlockIdSchema, BlockDataSchema)),
+  blockDataDocs: z.record(
+    DataDocIdSchema,
+    z.record(BlockIdSchema, BlockDataSchema),
+  ),
   label: z.string(),
   createdAt: z.coerce.date(),
 });
 
-export const SavePointSchema = z.discriminatedUnion("schema", [SavePointSchema_v2]);
+export const SavePointSchema = z.discriminatedUnion("schema", [
+  SavePointSchema_v2,
+]);
 
 export type BlockStatus = z.infer<typeof BlockStatusSchema>;
 export type BlockId = string;
@@ -100,7 +120,11 @@ export type SavePoint = z.infer<typeof SavePointSchema>;
 export const RespSchema = (dataSchema: z.ZodType) => {
   return z.discriminatedUnion("success", [
     z.object({ success: z.literal(true), data: dataSchema }),
-    z.object({ success: z.literal(false), code: z.number(), msg: z.string().optional() }),
+    z.object({
+      success: z.literal(false),
+      code: z.number(),
+      msg: z.string().optional(),
+    }),
   ]);
 };
 
@@ -116,6 +140,8 @@ export const ConfigSchema = z.object({
   maxParamLength: z.number().default(500),
   knowledgeBases: z.string().array().min(1),
   newKnowledgeBasePathPrefix: z.string(),
+  adminPasswordHash: z.string(),
+  adminSalt: z.string(),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
