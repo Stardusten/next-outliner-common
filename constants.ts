@@ -8,7 +8,11 @@ export const BLOCK_CONTENT_TYPES = {
   QUERY: 4,
 } as const;
 
+///////////////////////////
+
 export const BLOCK_TYPE_ZH_NAMES = ["文本", "图片", "代码", "公式", "查询"];
+
+///////////////////////////
 
 export const _RESP_CODES = {
   SUCCESS: 0,
@@ -36,3 +40,10 @@ export const RESP_CODES = {
   ..._RESP_CODES,
   ...RESP_CODES_NAMES,
 } as const;
+
+///////////////////////////
+
+export const BLOCK_INFO_DOC_NAME = "blockInfo";
+export const BLOCK_DATA_DOC_NAME_PREFIX = "blockData_";
+export const BLOCK_INFO_MAP_NAME = "data";
+export const BLOCK_DATA_MAP_NAME = "data";

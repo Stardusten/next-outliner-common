@@ -17,7 +17,7 @@ export interface ServerConnection {
 
 export interface ServerNetwork {
   // Register a handler for incoming connections
-  onConnection(handler: (conn: ServerConnection) => void): void;
+  onConnection(handler: (conn: ServerConnection, params: any) => void): void;
   // Start listening on a specified port
   startServer(host: string, port: number): void;
 }
