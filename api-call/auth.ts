@@ -5,13 +5,13 @@ import {
 import { usePostApi } from "../helper-functions/usePostApi";
 
 export const adminLogin = usePostApi(
-  "/admin-login",
+  "/login/admin",
   AdminLoginSchema.request,
   AdminLoginSchema.result,
 );
 
 export const kbEditorLogin = usePostApi(
-  "/kb-editor-login",
+  "/login/kb-editor",
   KbEditorLoginSchema.request,
   KbEditorLoginSchema.result,
 );
