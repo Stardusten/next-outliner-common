@@ -43,6 +43,7 @@ export const RESP_CODES = {
 
 ///////////////////////////
 
+export const APP_DB_PREFIX = "app_";
 export const BLOCK_INFO_DOC_NAME = "blockInfo";
 export const BLOCK_DATA_DOC_NAME_PREFIX = "blockData_";
 export const BLOCK_INFO_MAP_NAME = "data";
