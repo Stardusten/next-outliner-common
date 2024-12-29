@@ -1,7 +1,7 @@
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { z } from "zod";
 import { RESP_CODES } from "../constants";
-import { RespSchema, type Resp } from "../typeAndSchemas";
+import { RespSchema, type Resp } from "../type-and-schemas/resp";
 
 export const usePostApi = <
   PARAMS_SCHEMA extends z.ZodType,
