@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DirentsSchema } from "../../../utils/type-and-schemas/fs";
+import { DirentsSchema } from "../dirents";
 
 export const FsLsSchema = {
   request: z.object({
