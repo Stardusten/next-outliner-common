@@ -1,4 +1,13 @@
 import { usePostApi } from "../helper-functions/usePostApi";
-import { PingSchema } from "../type-and-schemas/api/misc";
+import {
+  FetchWebpageTitleSchema,
+  PingSchema,
+} from "../type-and-schemas/api/misc";
 
 export const ping = usePostApi("/ping", PingSchema.request, PingSchema.result);
+
+export const fetchWebpageTitle = usePostApi(
+  "/fetch-webpage-title",
+  FetchWebpageTitleSchema.request,
+  FetchWebpageTitleSchema.result,
+);
