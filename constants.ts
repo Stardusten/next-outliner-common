@@ -6,11 +6,12 @@ export const BLOCK_CONTENT_TYPES = {
   CODE: 2,
   MATH: 3,
   QUERY: 4,
+  CAROUSEL: 5,
 } as const;
 
 ///////////////////////////
 
-export const BLOCK_TYPE_ZH_NAMES = ["文本", "图片", "代码", "公式", "查询"];
+export const BLOCK_TYPE_ZH_NAMES = ["文本", "图片", "代码", "公式", "查询", "多图"];
 
 ///////////////////////////
 
@@ -32,9 +33,7 @@ export const _RESP_CODES = {
 
 export const RESP_CODES_NAMES: {
   [K in keyof typeof _RESP_CODES as (typeof _RESP_CODES)[K]]: K;
-} = Object.fromEntries(
-  Object.entries(_RESP_CODES).map(([key, val]) => [val, key]),
-) as any;
+} = Object.fromEntries(Object.entries(_RESP_CODES).map(([key, val]) => [val, key])) as any;
 
 export const RESP_CODES = {
   ..._RESP_CODES,

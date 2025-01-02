@@ -1,4 +1,4 @@
-import { AxiosInstance } from "axios";
+import { type AxiosInstance } from "axios";
 import { usePostApi } from "../helper-functions/usePostApi";
 import {
   FsEnsureAttachmentsDirSchema,
@@ -13,11 +13,7 @@ import { z } from "zod";
 
 export const fsLs = usePostApi(`/fs/ls`, FsLsSchema.request, FsLsSchema.result);
 
-export const fsStat = usePostApi(
-  `/fs/stat`,
-  FsStatSchema.request,
-  FsStatSchema.result,
-);
+export const fsStat = usePostApi(`/fs/stat`, FsStatSchema.request, FsStatSchema.result);
 
 /**
  * @param files [targetPath, File][]

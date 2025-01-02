@@ -8,24 +8,30 @@ export const TextContentSchema = z.tuple([
   z.any(), // prosemirror doc
 ]);
 
+export const ImageFilterSchema = z.enum([
+  "blend",
+  "circle",
+  "invert",
+  "invertW",
+  "outline",
+  "blendLuminosity",
+]);
+
 export const ImageContentSchema = z.tuple([
   z.literal(BLOCK_CONTENT_TYPES.IMAGE), // type
   z.string(), // path
   z.enum(["left", "center"]), // align
   z.string().nullable(), // caption
   z.number().nullable(), // width
-  z
-    .array(
-      z.enum([
-        "blend",
-        "circle",
-        "invert",
-        "invertW",
-        "outline",
-        "blendLuminosity",
-      ]),
-    )
-    .nullish(), // filters
+  z.array(ImageFilterSchema).nullable(), // filters
+]);
+
+export const CarouselContentSchema = z.tuple([
+  z.literal(BLOCK_CONTENT_TYPES.CAROUSEL), // type
+  z.array(z.string()), // paths
+  z.string().nullable(), // caption
+  z.number().nullable(), // width
+  z.array(ImageFilterSchema).nullable(), // filters
 ]);
 
 export const CodeContentSchema = z.tuple([
