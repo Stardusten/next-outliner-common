@@ -1,6 +1,7 @@
 import { type AxiosInstance } from "axios";
 import { usePostApi } from "../helper-functions/usePostApi";
 import {
+  ClearScannedImageSchema,
   FsEnsureAttachmentsDirSchema,
   FsGetAttachmentSignedUrlSchema,
   FsLsSchema,
@@ -13,7 +14,11 @@ import { z } from "zod";
 
 export const fsLs = usePostApi(`/fs/ls`, FsLsSchema.request, FsLsSchema.result);
 
-export const fsStat = usePostApi(`/fs/stat`, FsStatSchema.request, FsStatSchema.result);
+export const fsStat = usePostApi(
+  `/fs/stat`,
+  FsStatSchema.request,
+  FsStatSchema.result,
+);
 
 /**
  * @param files [targetPath, File][]
@@ -78,4 +83,10 @@ export const fsGetAttachmentSignedUrl = usePostApi(
   `/fs/get-attachment-signed-url`,
   FsGetAttachmentSignedUrlSchema.request,
   FsGetAttachmentSignedUrlSchema.result,
+);
+
+export const fsClearScannedImage = usePostApi(
+  `/fs/clear-scanned-image`,
+  ClearScannedImageSchema.request,
+  ClearScannedImageSchema.result,
 );

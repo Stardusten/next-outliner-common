@@ -47,3 +47,12 @@ export const FsGetAttachmentSignedUrlSchema = {
     signedUrl: z.string(),
   }),
 };
+
+export const ClearScannedImageSchema = {
+  request: z.object({
+    path: z.string(),
+  }),
+  result: z.object({
+    path: z.string(),
+  }),
+};
