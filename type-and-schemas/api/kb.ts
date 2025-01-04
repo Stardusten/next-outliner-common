@@ -26,3 +26,10 @@ export const RenameKbSchema = {
   }),
   result: z.object({}),
 };
+
+export const DeleteKbSchema = {
+  request: z.object({
+    location: z.string(),
+  }),
+  result: z.object({}),
+};
