@@ -3,10 +3,7 @@ import { z } from "zod";
 import { RESP_CODES } from "../constants";
 import { RespSchema, type Resp } from "../type-and-schemas/resp";
 
-export const usePostApi = <
-  PARAMS_SCHEMA extends z.ZodType,
-  RESULT_SCHEMA extends z.ZodType,
->(
+export const usePostApi = <PARAMS_SCHEMA extends z.ZodType, RESULT_SCHEMA extends z.ZodType>(
   endpoint: string,
   paramsSchema: PARAMS_SCHEMA,
   resultSchema: RESULT_SCHEMA,
@@ -27,9 +24,7 @@ export const usePostApi = <
 
       const res = await axios.post(endpoint, params, config);
       if (!res) {
-        console.error(
-          `[EMPTY_RESPONSE] endpoint=${endpoint}, params=${JSON.stringify(params)}`,
-        );
+        console.error(`[EMPTY_RESPONSE] endpoint=${endpoint}, params=${JSON.stringify(params)}`);
         return { success: false, code: RESP_CODES.UNKNOWN_ERROR };
       }
 
