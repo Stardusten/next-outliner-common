@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  BackupKbSchema,
   CreateKbSchema,
   GetAllKbInfoSchema,
   RenameKbSchema,
@@ -29,4 +30,10 @@ export const deleteKb = usePostApi(
   "/kb/delete",
   DeleteKbSchema.request,
   DeleteKbSchema.result,
+);
+
+export const backupKb = usePostApi(
+  "/kb/backup",
+  BackupKbSchema.request,
+  BackupKbSchema.result,
 );

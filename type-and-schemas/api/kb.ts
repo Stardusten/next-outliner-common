@@ -33,3 +33,12 @@ export const DeleteKbSchema = {
   }),
   result: z.object({}),
 };
+
+export const BackupKbSchema = {
+  request: z.object({
+    location: z.string(),
+  }),
+  result: z.object({
+    backupPath: z.string(),
+  }),
+};
