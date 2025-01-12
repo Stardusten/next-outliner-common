@@ -42,3 +42,15 @@ export const BackupKbSchema = {
     backupPath: z.string(),
   }),
 };
+
+export const ListAllBackupsSchema = {
+  request: z.object({
+    location: z.string(),
+  }),
+  result: z.array(
+    z.object({
+      name: z.string(),
+      size: z.number(),
+    }),
+  ),
+};

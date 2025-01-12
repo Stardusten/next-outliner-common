@@ -3,6 +3,7 @@ import {
   BackupKbSchema,
   CreateKbSchema,
   GetAllKbInfoSchema,
+  ListAllBackupsSchema,
   RenameKbSchema,
 } from "../type-and-schemas/api/kb";
 import { usePostApi } from "../helper-functions/usePostApi";
@@ -36,4 +37,10 @@ export const backupKb = usePostApi(
   "/kb/backup",
   BackupKbSchema.request,
   BackupKbSchema.result,
+);
+
+export const listAllBackups = usePostApi(
+  "/kb/backups",
+  ListAllBackupsSchema.request,
+  ListAllBackupsSchema.result,
 );
