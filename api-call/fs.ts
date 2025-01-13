@@ -2,9 +2,11 @@ import { type AxiosInstance } from "axios";
 import { usePostApi } from "../helper-functions/usePostApi";
 import {
   ClearScannedImageSchema,
+  FsDeleteSchema,
   FsEnsureAttachmentsDirSchema,
   FsGetAttachmentSignedUrlSchema,
   FsLsSchema,
+  FsRenameSchema,
   FsStatSchema,
   FsUploadSchema,
 } from "../type-and-schemas/api/fs";
@@ -89,4 +91,16 @@ export const fsClearScannedImage = usePostApi(
   `/fs/clear-scanned-image`,
   ClearScannedImageSchema.request,
   ClearScannedImageSchema.result,
+);
+
+export const fsDelete = usePostApi(
+  `/fs/delete`,
+  FsDeleteSchema.request,
+  FsDeleteSchema.result,
+);
+
+export const fsRename = usePostApi(
+  `/fs/rename`,
+  FsRenameSchema.request,
+  FsRenameSchema.result,
 );

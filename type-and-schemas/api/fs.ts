@@ -56,3 +56,18 @@ export const ClearScannedImageSchema = {
     path: z.string(),
   }),
 };
+
+export const FsDeleteSchema = {
+  request: z.object({
+    path: z.string(),
+  }),
+  result: z.object({}),
+};
+
+export const FsRenameSchema = {
+  request: z.object({
+    path: z.string(),
+    newName: z.string(),
+  }),
+  result: z.object({}),
+};
