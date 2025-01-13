@@ -34,13 +34,13 @@ export const deleteKb = usePostApi(
 );
 
 export const backupKb = usePostApi(
-  "/kb/backup",
+  "/kb/backup/create",
   BackupKbSchema.request,
   BackupKbSchema.result,
 );
 
 export const listAllBackups = usePostApi(
-  "/kb/backups",
+  "/kb/backup/listAll",
   ListAllBackupsSchema.request,
   ListAllBackupsSchema.result,
 );
