@@ -45,6 +45,17 @@ export const MathDisplayContentSchema = z.tuple([
   z.string(), // src
 ]);
 
+export const AudioContentSchema = z.tuple([
+  z.literal(BLOCK_CONTENT_TYPES.AUDIO), // type
+  z.string(), // src
+]);
+
+export const VideoContentSchema = z.tuple([
+  z.literal(BLOCK_CONTENT_TYPES.VIDEO), // type
+  z.string(), // src
+  z.number().nullable(), // width
+]);
+
 export const QueryContentSchema = z.tuple([
   z.literal(BLOCK_CONTENT_TYPES.QUERY), // type
   z.any(), // prosemirror doc of title
@@ -59,6 +70,9 @@ export const BlockContentSchema = z.union([
   CodeContentSchema,
   MathDisplayContentSchema,
   QueryContentSchema,
+  CarouselContentSchema,
+  AudioContentSchema,
+  VideoContentSchema,
 ]);
 
 /////////////// Types ///////////////
@@ -68,4 +82,7 @@ export type ImageContent = z.infer<typeof ImageContentSchema>;
 export type CodeContent = z.infer<typeof CodeContentSchema>;
 export type MathDisplayContent = z.infer<typeof MathDisplayContentSchema>;
 export type QueryContent = z.infer<typeof QueryContentSchema>;
+export type CarouselContent = z.infer<typeof CarouselContentSchema>;
+export type AudioContent = z.infer<typeof AudioContentSchema>;
+export type VideoContent = z.infer<typeof VideoContentSchema>;
 export type BlockContent = z.infer<typeof BlockContentSchema>;
