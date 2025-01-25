@@ -5,6 +5,7 @@ import {
   GetAllKbInfoSchema,
   ListAllBackupsSchema,
   RenameKbSchema,
+  ShrinkKbSchema,
 } from "../type-and-schemas/api/kb";
 import { usePostApi } from "../helper-functions/usePostApi";
 import { DeleteKbSchema } from "../type-and-schemas/api/kb";
@@ -43,4 +44,10 @@ export const listAllBackups = usePostApi(
   "/kb/backup/listAll",
   ListAllBackupsSchema.request,
   ListAllBackupsSchema.result,
+);
+
+export const shrinkKb = usePostApi(
+  "/kb/shrink",
+  ShrinkKbSchema.request,
+  ShrinkKbSchema.result,
 );

@@ -54,3 +54,13 @@ export const ListAllBackupsSchema = {
     }),
   ),
 };
+
+export const ShrinkKbSchema = {
+  request: z.object({
+    location: z.string(),
+  }),
+  result: z.object({
+    beforeSize: z.number(),
+    afterSize: z.number(),
+  }),
+};
