@@ -1,5 +1,9 @@
-import type { MinimalBlock } from "@/context/blocks/view-layer/blocksManager";
+import type { Block, MinimalBlock } from "@/context/blocks/view-layer/blocksManager";
 import type { BlockStatus } from "../type-and-schemas/block/block-status";
+import {
+  BlockPropertiesSchema,
+  type BlockProperties,
+} from "../type-and-schemas/block/block-properties";
 
 export const extractBlockStatus = (blockStatus: BlockStatus) => {
   const type = blockStatus & 0b11;
@@ -16,3 +20,7 @@ export const calcBlockStatus = (
 ) => {
   return (type == "normalBlock" ? 0 : type == "mirrorBlock" ? 1 : 2) | (fold ? 0b100 : 0);
 };
+
+export function getProperties(block: Block) {
+  return (block.metadata?.properties as BlockProperties) ?? {};
+}
