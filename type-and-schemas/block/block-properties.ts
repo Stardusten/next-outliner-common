@@ -26,16 +26,16 @@ export const BlockPropertiesSchema = z.record(
 
 export type BlockProperties = z.infer<typeof BlockPropertiesSchema>;
 
-export const BlockPropertyDefaultValues: Record<BlockProperties[string]["type"], any> = {
-  decimal: 0,
-  float: 0,
-  plaintext: "",
-  richtext: "",
-  date: new Date().toISOString().split("T")[0],
-  datetime: new Date().toISOString(),
-  select: "",
-  multiselect: [],
-  checkbox: false,
-  email: "",
-  phone: "",
+export const blockPropertyDefaults: Record<BlockProperties[string]["type"], any> = {
+  decimal: { type: "decimal", value: 0 },
+  float: { type: "float", value: 0 },
+  plaintext: { type: "plaintext", value: "" },
+  richtext: { type: "richtext", value: "", ctext: "" },
+  date: { type: "date", value: new Date().toISOString().split("T")[0] },
+  datetime: { type: "datetime", value: new Date().toISOString() },
+  select: { type: "select", value: "", options: [] },
+  multiselect: { type: "multiselect", value: [], options: [] },
+  checkbox: { type: "checkbox", value: false },
+  email: { type: "email", value: "" },
+  phone: { type: "phone", value: "" },
 };
